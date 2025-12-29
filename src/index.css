@@ -1,0 +1,360 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+
+:root {
+  --bg-dark: #0A0B10;
+  --bg-panel: #14151A;
+  --accent: #4CECB4;
+  /* Resolume Cyan/Teal */
+  --text-main: #E2E8F0;
+  --text-muted: #94A3B8;
+  --border: rgba(255, 255, 255, 0.08);
+  --handle-fill: #000;
+  --handle-border: #4CECB4;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+.master-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* --- Header --- */
+.master-toolbar {
+  height: 64px;
+  background: rgba(20, 21, 26, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.brand-tag {
+  font-size: 10px;
+  background: rgba(76, 236, 180, 0.1);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.btn-icon.active {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 12px rgba(76, 236, 180, 0.4);
+}
+
+.btn-primary {
+  height: 36px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  width: 280px;
+  background: rgba(20, 21, 26, 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 90;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  max-height: calc(100vh - 100px);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.item-header h4 {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.item-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.item-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.item-card.selected {
+  border-color: var(--accent);
+  background: rgba(76, 236, 180, 0.05);
+}
+
+.prop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: #000;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.prop-row label {
+  color: var(--text-muted);
+  width: 16px;
+}
+
+.prop-row .val {
+  color: var(--accent);
+  flex: 1;
+  text-align: center;
+}
+
+.btn-tiny {
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: #222;
+  color: #fff;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.btn-tiny:hover {
+  background: #444;
+}
+
+/* --- Viewport --- */
+.viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  /* Pure black like Resolume */
+}
+
+/* --- Canvas Objects --- */
+.canvas-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.stage-image {
+  pointer-events: none;
+  opacity: 0.5;
+  /* Dimmer for better contrast */
+}
+
+.master-frame-visual {
+  position: absolute;
+  border: 2px solid #2979FF;
+  /* User requested Blue */
+  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.85);
+  /* Darker backdrop focus */
+  pointer-events: none;
+}
+
+.slice-obj {
+  position: absolute;
+  background: rgba(76, 236, 180, 0.1);
+  border: 1px solid var(--accent);
+  transition: background-color 0.1s, box-shadow 0.1s, border-color 0.1s;
+}
+
+.slice-obj:hover {
+  background: rgba(76, 236, 180, 0.2);
+  box-shadow: 0 0 0 1px #fff, 0 0 20px rgba(76, 236, 180, 0.4);
+  /* Reaction effect */
+}
+
+.slice-obj.active {
+  background: rgba(76, 236, 180, 0.25);
+  z-index: 10;
+}
+
+.selection-box {
+  border: 1px solid var(--accent);
+}
+
+.selection-box.slice {
+  border: 1px solid #fff;
+  /* Inactive slice white border */
+}
+
+.slice-obj.active .selection-box.slice {
+  border-color: var(--accent);
+}
+
+.hit-zone {
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Resolume Style Handles: Hollow Squares */
+.visual-node {
+  background: #000;
+  border: 1.5px solid var(--accent);
+  /* box-shadow: 0 0 4px rgba(0,0,0,0.5); */
+  /* Cleaner flat look */
+  border-radius: 0;
+  /* Square */
+  transition: transform 0.1s;
+}
+
+.hit-zone:hover .visual-node {
+  background: var(--accent);
+  transform: scale(1.2);
+}
+
+.rotate-node {
+  border-radius: 50%;
+  background: #000;
+  border: 1px solid #fff;
+}
+
+.rotate-line {
+  background: #fff;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ref-line {
+  position: absolute;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.8;
+  box-shadow: 0 0 4px var(--accent);
+}
+
+.ghost-hud {
+  position: fixed;
+  background: #222;
+  color: var(--accent);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 999;
+  transform: translate(15px, 15px);
+  white-space: pre;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Cursors */
+.cursor-nwse {
+  cursor: nwse-resize;
+}
+
+.cursor-nesw {
+  cursor: nesw-resize;
+}
+
+.cursor-ew {
+  cursor: ew-resize;
+}
+
+.cursor-ns {
+  cursor: ns-resize;
+}
+
+.cursor-rotate {
+  cursor: grab;
+}
+
+.cursor-rotate:active {
+  cursor: grabbing;
+}
