@@ -425,19 +425,20 @@ function App() {
       else if (state.type === 'RESIZE') {
         const s = state.snapshot;
         const currentAspect = resolution.w / resolution.h;
-        const h = selectedId === 'master' ? s.w / currentAspect : s.h;
+        // Use Explicit Variable Name to avoid ReferenceError
+        const currentH = selectedId === 'master' ? s.w / currentAspect : s.h;
 
         // Current Mouse in Original Local Space
         const cx = s.x + s.w / 2;
-        const cy = s.y + h / 2;
+        const cy = s.y + currentH / 2;
         const curLocal = rotatePoint(c.x, c.y, cx, cy, -s.rotation);
 
         let dx = curLocal.x - state.startLocal.x;
         let dy = curLocal.y - state.startLocal.y;
 
-        if (isCtrl) { dx *= 2; dy *= 2; } // Center scale (skip snap for center scale for now to keep simple)
+        if (isCtrl) { dx *= 2; dy *= 2; }
 
-        let newX = s.x, newY = s.y, newW = s.w, newH = h;
+        let newX = s.x, newY = s.y, newW = s.w, newH = currentH;
         const hid = state.handle;
 
         // 1. Apply Delta
@@ -446,10 +447,10 @@ function App() {
         if (hid.includes('s')) newH += dy;
         if (hid.includes('n')) { newY += dy; newH -= dy; }
 
-        // 2. SNAP Logic for RESIZE
+        // 2. SNAP Logic
         let gx = null, gy = null;
 
-        if (!isCtrl && !isShift && s.rotation === 0) { // Only snap if not rotated/ratio-locked (too complex otherwise)
+        if (!isCtrl && !isShift && s.rotation === 0) {
           if (hid.includes('w')) {
             const snapRes = getS_X(newX);
             if (snapRes.s) { newW += (newX - snapRes.v); newX = snapRes.v; gx = snapRes.v; }
@@ -470,31 +471,31 @@ function App() {
         setGuides({ x: gx, y: gy });
 
         if (isShift) {
-          // ... keep shift logic (skip snap if shift)
-          const ratio = s.w / h;
+          const ratio = s.w / currentH;
           if (hid.length === 2) {
+            // Corner Resize with Aspect Lock
             if (Math.abs(newW / ratio) > Math.abs(newH)) newH = newW / ratio;
             else newW = newH * ratio;
+
             if (hid.includes('w')) newX = s.x + s.w - newW;
-            if (hid.includes('n')) newY = s.y + h - newH;
+            if (hid.includes('n')) newY = s.y + currentH - newH;
           }
         }
 
         if (newW < 10) newW = 10;
         if (newH < 10) newH = 10;
 
-        // Re-center rotation pivot logic (Simplified: Center Shift)
+        // Re-center rotation pivot logic
         const newCxLocal = newX + newW / 2;
         const newCyLocal = newY + newH / 2;
         const dcx = newCxLocal - (s.x + s.w / 2);
-        const dcy = newCyLocal - (s.y + h / 2);
+        const dcy = newCyLocal - (s.y + currentH / 2);
 
         // Rotate offset to World
         const dWorld = rotatePoint(dcx, dcy, 0, 0, s.rotation);
 
-        // Old Center World
         const oldCxWorld = s.x + s.w / 2;
-        const oldCyWorld = s.y + h / 2;
+        const oldCyWorld = s.y + currentH / 2;
 
         const finalCx = oldCxWorld + dWorld.x;
         const finalCy = oldCyWorld + dWorld.y;

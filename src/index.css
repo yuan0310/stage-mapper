@@ -215,6 +215,9 @@ body {
   overflow: hidden;
   background: #000;
   /* Pure black like Resolume */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* --- Canvas Objects --- */
