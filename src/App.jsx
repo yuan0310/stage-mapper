@@ -663,6 +663,7 @@ function App() {
 
   const renderHandles = (obj, isM) => {
     const invScale = 1 / view.scale;
+    const h = isM ? obj.w / (resolution.w / resolution.h) : obj.h;
 
     // 8 Cardinal Handles (Percentages)
     const handles = [
