@@ -704,19 +704,23 @@ function App() {
 
         <div className="item-header" style={{ marginTop: 16 }}><h4 style={{ textTransform: 'uppercase', letterSpacing: 1 }}>Properties</h4></div>
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          <button className="btn-primary" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 8 }} onClick={() => {
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
+          <button className="btn-primary" style={{ justifyContent: 'center' }} onClick={() => {
             const data = JSON.stringify({ master, slices }, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'stage_map.json'; a.click();
           }}>
-            <FileJson size={16} /> <span>SAVE JSON</span>
+            <FileJson size={14} /> JSON
           </button>
-          <button className="btn-icon" style={{ borderColor: '#ff4444', color: '#ff4444', width: 36 }} onClick={() => {
+          <button className="btn-primary" style={{ justifyContent: 'center', background: '#FF9800', color: '#000' }} onClick={exportResolumeXML}>
+            <FileJson size={14} /> XML
+          </button>
+
+          <button className="btn-icon" style={{ borderColor: '#ff4444', color: '#ff4444', width: '100%', gridColumn: 'span 2' }} onClick={() => {
             if (confirm('Clear all slices?')) setSlices([]);
           }} title="Clear All Slices">
-            <Trash2 size={16} />
+            <Trash2 size={16} /> CLEAR ALL
           </button>
         </div>
 
