@@ -565,6 +565,35 @@ function App() {
     };
   };
 
+  /* --- Resolume XML Generator --- */
+  const exportResolumeXML = () => {
+    let xml = '<?xml version="1.0" encoding="utf-8"?>\n';
+    xml += '<ScreenSetup>\n';
+    xml += '  <Screens>\n';
+    xml += `    <Screen name="StageMapper" width="${resolution.w}" height="${resolution.h}">\n`;
+    xml += '      <Layers>\n';
+
+    // Convert Slices
+    slices.forEach((s, i) => {
+      const m = mapToOut(s); // Projected (Output) Coordinates
+
+      xml += `        <Slice name="Slice ${i + 1}" enabled="1">\n`;
+      // Input assumes 1:1 mapping to Output
+      xml += `          <InputRect l="${m.x}" t="${m.y}" r="${m.x + m.w}" b="${m.y + m.h}"/>\n`;
+      xml += `          <OutputRect l="${m.x}" t="${m.y}" r="${m.x + m.w}" b="${m.y + m.h}"/>\n`;
+      xml += `        </Slice>\n`;
+    });
+
+    xml += '      </Layers>\n';
+    xml += '    </Screen>\n';
+    xml += '  </Screens>\n';
+    xml += '</ScreenSetup>';
+
+    const blob = new Blob([xml], { type: 'text/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'StageMapper_Resolume.xml'; a.click();
+  };
+
   const renderHandles = (obj, isM) => {
     const invScale = 1 / view.scale;
     const h = isM ? obj.w / (resolution.w / resolution.h) : obj.h;
