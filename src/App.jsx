@@ -567,36 +567,101 @@ function App() {
 
   /* --- Resolume XML Generator --- */
   const exportResolumeXML = () => {
+    // Helper to get 4 corners (TL, TR, BR, BL) applying rotation
+    const getVertices = (x, y, w, h, rotation) => {
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const rad = (rotation * Math.PI) / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+
+      const corners = [
+        { x: x, y: y },         // TL
+        { x: x + w, y: y },     // TR
+        { x: x + w, y: y + h }, // BR
+        { x: x, y: y + h }      // BL
+      ];
+
+      return corners.map(p => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        return {
+          x: cx + (dx * cos - dy * sin),
+          y: cy + (dx * sin + dy * cos)
+        };
+      });
+    };
+
     let xml = '<?xml version="1.0" encoding="utf-8"?>\n';
-    xml += '<ScreenSetup>\n';
-    xml += '  <Screens>\n';
-    xml += `    <Screen name="StageMapper" width="${resolution.w}" height="${resolution.h}">\n`;
-    xml += '      <Layers>\n';
+    // Header based on user screenshot (Arena 7+)
+    xml += '<XmlState name="StageMapperExport">\n';
+    xml += '  <versionInfo name="Resolume Arena" majorVersion="7" minorVersion="3" microVersion="0" revision="70000"/>\n';
+    xml += '  <ScreenSetup name="ScreenSetup">\n';
+    xml += '    <Params name="ScreenSetupParams"/>\n';
+    xml += '    <screens>\n';
 
-    // Convert Slices
+    // Use a fixed random ID for the screen
+    xml += `      <Screen name="Stage Mapper Screen" uniqueId="${Date.now()}">\n`;
+    xml += '        <Params name="Params">\n';
+    // Minimal Required Params to ensure visibility
+    xml += '          <ParamRange name="Opacity" default="1" value="1"/>\n';
+    xml += '          <Param name="Enabled" default="1" value="1"/>\n';
+    xml += '        </Params>\n';
+
+    // Layers container usually holds Slices
+    xml += '        <layers>\n';
+
     slices.forEach((s, i) => {
-      const m = mapToOut(s); // Projected (Output) Coordinates
+      const m = mapToOut(s); // Canvas coords
+      const v = getVertices(m.x, m.y, m.w, m.h, s.rotation);
 
-      xml += `        <Slice name="Slice ${i + 1}" enabled="1">\n`;
-      // Input assumes 1:1 mapping to Output
-      xml += `          <InputRect l="${m.x}" t="${m.y}" r="${m.x + m.w}" b="${m.y + m.h}"/>\n`;
-      xml += `          <OutputRect l="${m.x}" t="${m.y}" r="${m.x + m.w}" b="${m.y + m.h}"/>\n`;
-      xml += `        </Slice>\n`;
+      // Generate Unique ID for slice
+      const uid = Date.now() + i * 100;
+
+      xml += `          <Slice name="Slice ${i + 1}" uniqueId="${uid}">\n`;
+      xml += '            <Params name="Params">\n';
+      xml += '              <ParamRange name="Opacity" default="1" value="1"/>\n';
+      xml += '              <Param name="Enabled" default="1" value="1"/>\n';
+      xml += '            </Params>\n';
+
+      // InputRect: Usually mapping from the Composition (1920x1080)
+      // For simplicity, we map 1:1 to Output size for now, 
+      // effectively making it a "Direct Mapping".
+      xml += `            <InputRect orientation="0">\n`;
+      v.forEach(p => xml += `              <v x="${p.x}" y="${p.y}"/>\n`);
+      xml += `            </InputRect>\n`;
+
+      // OutputRect: The physical mapping on the projector
+      xml += `            <OutputRect orientation="0">\n`;
+      v.forEach(p => xml += `              <v x="${p.x}" y="${p.y}"/>\n`);
+      xml += `            </OutputRect>\n`;
+
+      // Add a default Warper to satisfy schema (Identity warp)
+      xml += '            <Warper>\n';
+      xml += '              <Params name="Warper"/>\n'; // Empty params
+      xml += '              <BezierWarper>\n';
+      xml += '                <vertices>\n'; // Default 4-point warp
+      v.forEach(p => xml += `                  <v x="${p.x}" y="${p.y}"/>\n`);
+      xml += '                </vertices>\n';
+      xml += '              </BezierWarper>\n';
+      xml += '            </Warper>\n';
+
+      xml += `          </Slice>\n`;
     });
 
-    xml += '      </Layers>\n';
-    xml += '    </Screen>\n';
-    xml += '  </Screens>\n';
-    xml += '</ScreenSetup>';
+    xml += '        </layers>\n';
+    xml += '      </Screen>\n';
+    xml += '    </screens>\n';
+    xml += '  </ScreenSetup>\n';
+    xml += '</XmlState>';
 
     const blob = new Blob([xml], { type: 'text/xml' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'StageMapper_Resolume.xml'; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = 'StageMapper_Arena.xml'; a.click();
   };
 
   const renderHandles = (obj, isM) => {
     const invScale = 1 / view.scale;
-    const h = isM ? obj.w / (resolution.w / resolution.h) : obj.h;
 
     // 8 Cardinal Handles (Percentages)
     const handles = [
